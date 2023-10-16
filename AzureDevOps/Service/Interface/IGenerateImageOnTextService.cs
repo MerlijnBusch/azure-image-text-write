@@ -8,6 +8,6 @@ namespace AzureDevOps.Service.Interface
 {
     public interface IGenerateImageOnTextService
     {
-        public byte[] AddTextToImage(byte[] imageBytes);
+        public byte[] AddTextToImage(byte[] imageBytes, string text);
     }
 }

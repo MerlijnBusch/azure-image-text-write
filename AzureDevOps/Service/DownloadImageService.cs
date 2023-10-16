@@ -14,7 +14,7 @@ namespace AzureDevOps.Service
 
         private string BuildImageUrl()
         {
-            return "https://picsum.photos/200/300";
+            return "https://picsum.photos/500/900";
         }
 
         public async Task<byte[]> DownloadImageAsync()

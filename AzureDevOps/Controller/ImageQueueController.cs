@@ -48,8 +48,6 @@ namespace AzureDevOps.Controller
 
                 var bytes = Encoding.UTF8.GetBytes(serialize);
                 await queueClient.SendMessageAsync(Convert.ToBase64String(bytes));
-
-                break;
             }
         }
 

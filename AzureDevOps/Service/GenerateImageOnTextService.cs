@@ -6,7 +6,7 @@ namespace AzureDevOps.Service
     public class GenerateImageOnTextService : IGenerateImageOnTextService
     {
 
-        public byte[] AddTextToImage(byte[] imageBytes)
+        public byte[] AddTextToImage(byte[] imageBytes, string t)
         {
             using MemoryStream imageStream = new MemoryStream(imageBytes);
             using MagickImage image        = new MagickImage(imageStream);
@@ -16,7 +16,7 @@ namespace AzureDevOps.Service
             image.Settings.FontWeight    = FontWeight.Bold;
             image.Settings.FontPointsize = 20;
 
-            DrawableText text = new DrawableText(50, 100, "Hello, World");
+            DrawableText text = new DrawableText(2, 10, t);
 
             image.Draw(text);
 

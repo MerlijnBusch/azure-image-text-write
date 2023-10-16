@@ -1,8 +1,10 @@
 using System;
 using Azure.Storage.Queues.Models;
+using AzureDevOps.Model;
 using AzureDevOps.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace AzureDevOps.Controller
 {
@@ -30,29 +32,36 @@ namespace AzureDevOps.Controller
         {
             _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
 
+            if(message.MessageText == null || message == null) {
+                return;
+            }
+
+            StationMeasurement measurement = JsonConvert.DeserializeObject<StationMeasurement>(message.MessageText);
+
+            _logger.LogInformation(measurement.stationname);
+
+            string formattedMeasurementInfo = $@"
+                Station: {measurement.stationname}
+                Location: Latitude {measurement.lat}, Longitude {measurement.lon}
+                Timestamp: {measurement.timestamp}
+                Weather Description: {measurement.weatherdescription}
+                Temperature: {measurement.temperature}°C
+                Feel Temperature: {measurement.feeltemperature}°C
+                Humidity: {measurement.humidity}%
+                Wind: {measurement.winddirection} at {measurement.windspeed} m/s
+                Precipitation: {measurement.precipitation} mm
+                Sun Power: {measurement.sunpower} W/m²
+                Rainfall (Last 24 Hours): {measurement.rainFallLast24Hour} mm
+                Rainfall (Last Hour): {measurement.rainFallLastHour} mm
+            ";
+
             byte[] image = await _downloadImageService.DownloadImageAsync();
 
             _logger.LogInformation(image.Length.ToString());
 
-            byte[] image2 = _generateImageOnTextService.AddTextToImage(image);
+            byte[] image2 = _generateImageOnTextService.AddTextToImage(image, formattedMeasurementInfo);
 
-            await _blobStorageService.UploadImageAsync(image2, "some text");
-
-
-            try
-            {
-                string filePath = "C:\\Users\\merli\\source\\repos\\AzureDevOps\\AzureDevOps\\Controller\\image.jpg"; // Update the file path as needed
-
-                // Write the byte array to the file
-                System.IO.File.WriteAllBytes(filePath, image2);
-
-                // After this, you can open the saved image file using your preferred image viewer to verify if it downloaded correctly.
-            }
-            catch (Exception ex)
-            {
-                // Handle any exceptions that occur during the file writing process
-                Console.WriteLine($"An error occurred while saving the image: {ex.Message}");
-            }
+            await _blobStorageService.UploadImageAsync(image2, measurement.stationname);
         }
     }
 }
