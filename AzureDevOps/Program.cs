@@ -1,3 +1,6 @@
+using AzureDevOps.DAL;
+using AzureDevOps.DAL.Interface;
+using AzureDevOps.Model;
 using AzureDevOps.Service;
 using AzureDevOps.Service.Interface;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +17,7 @@ var host = new HostBuilder()
         services.AddTransient<IDownloadWeatherApiService,  DownloadWeatherApiService>();
         services.AddTransient<IGenerateImageOnTextService, GenerateImageOnTextService>();
         services.AddTransient<IBlobStorageService,         BlobStorageService>();
+        services.AddTransient<IJobRepository<Job>,         JobRepository<Job>>();
     })
     .Build();
 

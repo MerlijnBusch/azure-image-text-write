@@ -27,7 +27,18 @@ namespace AzureDevOps.Controller
         [Function(nameof(ImageQueueController))]
         public async Task Run([QueueTrigger("imagequeue", Connection = "default")] QueueMessage message)
         {
-            _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
+            if(message == null || message.MessageText == null)
+            {
+                return;
+            }
+
+            Job test = JsonConvert.DeserializeObject<Job>(message.MessageText);
+            string jobId = message.Body.ToString();
+
+            _logger.LogInformation("Some job id");
+            _logger.LogInformation(test.JobId);
+
+            throw new Exception();
 
             BuienradarData? data = await _downloadWeatherApiService.DownloadBuienradarDataAsync();
 
@@ -38,6 +49,7 @@ namespace AzureDevOps.Controller
 
             QueueClient queueClient = InitializeQueueClient();
 
+            Job job = JsonConvert.DeserializeObject<Job>(message.MessageText);
 
             foreach (var stationMeasurement in data.actual.stationmeasurements)
             {
