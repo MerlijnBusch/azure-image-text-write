@@ -12,18 +12,16 @@ namespace AzureDevOps.Service
     public class BlobStorageService : IBlobStorageService
     {
         private string _connectionString; // UseDevelopmentStorage=true for local Azure Storage Emulator
-        private string _containerName;   // The name of the container
 
         public BlobStorageService()
         {
             _connectionString = "UseDevelopmentStorage=true";
-            _containerName = "test";
         }
 
-        public async Task UploadImageAsync(byte[] imageBytes, string imageName)
+        public async Task UploadImageAsync(string containerName, byte[] imageBytes, string imageName)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName.Replace("-", ""));
 
             // Create the container if it doesn't exist
             await containerClient.CreateIfNotExistsAsync();
@@ -37,12 +35,12 @@ namespace AzureDevOps.Service
             }
         }
 
-        public IEnumerable<string> ListBlobUrls()
+        public IEnumerable<string> ListBlobUrls(string containerName)
         {
             List<string> blobUrls = new List<string>();
 
             BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_containerName);
+            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName.Replace("-", ""));
 
             foreach (BlobItem blobItem in containerClient.GetBlobs())
             {

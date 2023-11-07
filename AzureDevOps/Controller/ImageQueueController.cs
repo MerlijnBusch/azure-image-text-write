@@ -27,18 +27,17 @@ namespace AzureDevOps.Controller
         [Function(nameof(ImageQueueController))]
         public async Task Run([QueueTrigger("imagequeue", Connection = "default")] QueueMessage message)
         {
-            if(message == null || message.MessageText == null)
+            if (message == null || message.MessageText == null)
             {
                 return;
             }
 
-            Job test = JsonConvert.DeserializeObject<Job>(message.MessageText);
-            string jobId = message.Body.ToString();
+            Job job = JsonConvert.DeserializeObject<Job>(message.MessageText);
 
-            _logger.LogInformation("Some job id");
-            _logger.LogInformation(test.JobId);
-
-            throw new Exception();
+            if (job == null || job.JobId == null)
+            {
+                return;
+            }
 
             BuienradarData? data = await _downloadWeatherApiService.DownloadBuienradarDataAsync();
 
@@ -49,17 +48,23 @@ namespace AzureDevOps.Controller
 
             QueueClient queueClient = InitializeQueueClient();
 
-            Job job = JsonConvert.DeserializeObject<Job>(message.MessageText);
+            int totalItems = data.actual.stationmeasurements.Count; // Total number of items
+            int currentItem = 1; // Counter for the current item
 
             foreach (var stationMeasurement in data.actual.stationmeasurements)
             {
-                string serialize = JsonConvert.SerializeObject(stationMeasurement);
+                bool isLastItem = currentItem == totalItems;
 
-                //make this hole foreach get pushed into the imagequeuegenerate queue
-                _logger.LogInformation($"Station Name: {stationMeasurement.stationname}");
+                QueueData queueData = new(job.JobId, stationMeasurement, isLastItem);
+
+                string serialize = JsonConvert.SerializeObject(queueData);
+
+                _logger.LogInformation($"Station Name: {queueData}");
 
                 var bytes = Encoding.UTF8.GetBytes(serialize);
                 await queueClient.SendMessageAsync(Convert.ToBase64String(bytes));
+
+                currentItem++;
             }
         }
 

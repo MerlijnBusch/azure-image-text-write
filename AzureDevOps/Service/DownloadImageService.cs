@@ -21,8 +21,6 @@ namespace AzureDevOps.Service
         {
             string imageUrl = BuildImageUrl();
 
-            _logger.LogInformation(imageUrl);
-
             using var httpClient = new HttpClient();
             try
             {
@@ -35,14 +33,12 @@ namespace AzureDevOps.Service
                 }
                 else
                 {
-                    _logger.LogInformation("Failed to download image");
-                    throw new Exception();
+                    throw new Exception("Failed to download image");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogInformation("An error occurred while downloading the image.", ex);
-                throw new Exception();
+                throw new Exception("An error occurred while downloading the image.", ex);
             }
         }
     }

@@ -1,5 +1,5 @@
-using System;
 using Azure.Storage.Queues.Models;
+using AzureDevOps.DAL.Interface;
 using AzureDevOps.Model;
 using AzureDevOps.Service.Interface;
 using Microsoft.Azure.Functions.Worker;
@@ -14,31 +14,34 @@ namespace AzureDevOps.Controller
         private readonly IDownloadImageService _downloadImageService;
         private readonly IGenerateImageOnTextService _generateImageOnTextService;
         private readonly IBlobStorageService _blobStorageService;
+        private readonly IJobRepository<Job> _jobRepository;
 
         public GenerateImageController(
             ILogger<GenerateImageController> logger,
             IDownloadImageService downloadImageService,
             IGenerateImageOnTextService generateImageOnTextService,
-            IBlobStorageService blobStorageService
+            IBlobStorageService blobStorageService,
+            IJobRepository<Job> jobRepository
         ) {
             _logger                     = logger;
             _downloadImageService       = downloadImageService;
             _generateImageOnTextService = generateImageOnTextService;
             _blobStorageService         = blobStorageService;
+            _jobRepository              = jobRepository;
         }
 
         [Function(nameof(GenerateImageController))]
         public async Task Run([QueueTrigger("imagequeuegenerate", Connection = "default")] QueueMessage message)
         {
-            _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
+          //  _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
 
             if(message.MessageText == null || message == null) {
                 return;
             }
 
-            StationMeasurement measurement = JsonConvert.DeserializeObject<StationMeasurement>(message.MessageText);
+            QueueData queueData = JsonConvert.DeserializeObject<QueueData>(message.MessageText);
 
-            _logger.LogInformation(measurement.stationname);
+            StationMeasurement measurement = queueData.Measurement;
 
             string formattedMeasurementInfo = $@"
                 Station: {measurement.stationname}
@@ -57,11 +60,24 @@ namespace AzureDevOps.Controller
 
             byte[] image = await _downloadImageService.DownloadImageAsync();
 
-            _logger.LogInformation(image.Length.ToString());
+          //  _logger.LogInformation(image.Length.ToString());
 
             byte[] image2 = _generateImageOnTextService.AddTextToImage(image, formattedMeasurementInfo);
 
-            await _blobStorageService.UploadImageAsync(image2, measurement.stationname);
+            await _blobStorageService.UploadImageAsync(queueData.JobId, image2, measurement.stationname);
+
+            if (queueData.Finished)
+            {
+
+                _logger.LogInformation("upload");
+
+                await _jobRepository.GetOrCreateTableAsync("test");
+
+                Job job = await _jobRepository.FindByIdAsync("Job_Status", queueData.JobId);
+                job.Status = 2;
+
+                await _jobRepository.UpdateAsync(job);
+            }
         }
     }
 }
