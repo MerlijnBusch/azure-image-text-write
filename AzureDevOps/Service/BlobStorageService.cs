@@ -15,16 +15,24 @@ namespace AzureDevOps.Service
 
         public BlobStorageService()
         {
-            _connectionString = "UseDevelopmentStorage=true";
+            string? connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+
+            if (connectionString == null)
+            {
+                throw new Exception("Table storage con string not working");
+            }
+
+            _connectionString = connectionString;
         }
 
         public async Task UploadImageAsync(string containerName, byte[] imageBytes, string imageName)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(_connectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName.Replace("-", ""));
-
+            
             // Create the container if it doesn't exist
             await containerClient.CreateIfNotExistsAsync();
+            containerClient.SetAccessPolicy(PublicAccessType.Blob);
 
             BlobClient blobClient = containerClient.GetBlobClient(GetFormattedBlobName(imageName));
 

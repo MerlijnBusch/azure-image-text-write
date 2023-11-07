@@ -31,7 +31,7 @@ namespace AzureDevOps.Controller
         }
 
         [Function(nameof(GenerateImageController))]
-        public async Task Run([QueueTrigger("imagequeuegenerate", Connection = "default")] QueueMessage message)
+        public async Task Run([QueueTrigger("imagequeuegenerate", Connection = "AzureWebJobsStorage")] QueueMessage message)
         {
           //  _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
 

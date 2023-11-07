@@ -25,7 +25,7 @@ namespace AzureDevOps.Controller
         }
 
         [Function(nameof(ImageQueueController))]
-        public async Task Run([QueueTrigger("imagequeue", Connection = "default")] QueueMessage message)
+        public async Task Run([QueueTrigger("imagequeue", Connection = "AzureWebJobsStorage")] QueueMessage message)
         {
             if (message == null || message.MessageText == null)
             {
@@ -70,7 +70,13 @@ namespace AzureDevOps.Controller
 
         private QueueClient InitializeQueueClient()
         {
-            var connectionString = "UseDevelopmentStorage=true"; // Connection string for the local Azure Storage Emulator
+            string? connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+
+            if (connectionString == null)
+            {
+                throw new Exception("Table storage con string not working");
+            }
+
             var queueServiceClient = new QueueServiceClient(connectionString);
             var queueClient = queueServiceClient.GetQueueClient("imagequeuegenerate");
 

@@ -109,14 +109,14 @@ namespace AzureDevOps.DAL
 
         private string GetDatabaseUrlFromConfigurations()
         {
-            string? url = "UseDevelopmentStorage=true";
+            string? connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
 
-            if (url == null)
+            if(connectionString == null)
             {
-                throw new Exception();
+                throw new Exception("Table storage con string not working");
             }
 
-            return url;
+            return connectionString;
         }
     }
 }
