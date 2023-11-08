@@ -1,0 +1,68 @@
+{
+	"info": {
+		"_postman_id": "6d736efc-0b10-49aa-9812-d1cd720720da",
+		"name": "New Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "21171779"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://inh-4843-ssp-d-azwe-fa-1.azurewebsites.net/api/init?code=0rFZ1jmLYV0uWaiB9XICh9juV6BVhuaG8ubzVvSrhRnuAzFuxp2mZg==",
+					"protocol": "https",
+					"host": [
+						"inh-4843-ssp-d-azwe-fa-1",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"init"
+					],
+					"query": [
+						{
+							"key": "code",
+							"value": "0rFZ1jmLYV0uWaiB9XICh9juV6BVhuaG8ubzVvSrhRnuAzFuxp2mZg=="
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"job\": \"<uuid of previous>\"\r\n}"
+				},
+				"url": {
+					"raw": "https://inh-4843-ssp-d-azwe-fa-1.azurewebsites.net/api/blobs?code=0rFZ1jmLYV0uWaiB9XICh9juV6BVhuaG8ubzVvSrhRnuAzFuxp2mZg==",
+					"protocol": "https",
+					"host": [
+						"inh-4843-ssp-d-azwe-fa-1",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"blobs"
+					],
+					"query": [
+						{
+							"key": "code",
+							"value": "0rFZ1jmLYV0uWaiB9XICh9juV6BVhuaG8ubzVvSrhRnuAzFuxp2mZg=="
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
